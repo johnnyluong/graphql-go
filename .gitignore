@@ -1,0 +1,38 @@
+# Compiled Go binaries and executables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Compiled Go object files
+*.o
+*.a
+
+# Generated gqlgen code
+/generated/
+
+# Environment-specific files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+log/
+
+# Dependency directories (e.g., for Go modules)
+/vendor/
+/go.sum
+
+# IDE and editor files
+.idea/
+.vscode/
+*.sublime-*
+*.swp
+*.swo
+
+# Build artifacts
+/build/
+/dist/
