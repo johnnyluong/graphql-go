@@ -1,0 +1,26 @@
+services:
+  app:
+    build: .
+    container_name: graphql-go  
+    command: go run server.go
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    networks:
+      - gql-network
+
+  db:
+    image: mysql:latest
+    container_name: db
+    ports:
+      - 3360:3360
+    env_file:
+      - .env.dev
+    networks:
+      - gql-network
+
+networks:
+  gql-network:
