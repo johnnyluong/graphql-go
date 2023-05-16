@@ -16,16 +16,8 @@ RUN go mod tidy
 COPY ./ .
 
 # Install any additional dependencies or tools you need
-RUN go get github.com/golang-migrate/migrate/v4/cmd/migrate
-RUN go build -tags 'mysql' -ldflags="-X main.Version=1.0.0" -o $(go env GOPATH)/bin/migrate github.com/golang-migrate/migrate/v4/cmd/migrate/
+# RUN go get github.com/golang-migrate/migrate/v4/cmd/migrate
+# RUN go build -tags 'mysql' -ldflags="-X main.Version=1.0.0" -o $(go env GOPATH)/bin/migrate github.com/golang-migrate/migrate/v4/cmd/migrate/
 
 # Set the command to run when the container starts
 CMD ["go", "run", "server.go"]
-
-
-
-# delete everything but docker
-# add gqlgen to tool.go
-# run the container with just goland and gomod
-# connect container to vscode
-# start development in the container since we cannot build myysql for go
