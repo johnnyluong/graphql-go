@@ -1,4 +1,17 @@
 services:
+  db:
+    image: mysql:latest
+    container_name: db
+    ports:
+      - 3360:3360
+    env_file:
+      - .env.dev
+    networks:
+      - gql-network
+    # change ./data to wherever you want to store the persisted data
+    volumes:
+      - ./data:/var/lib/mysql
+
   app:
     build: .
     container_name: graphql-go  
@@ -12,15 +25,7 @@ services:
     networks:
       - gql-network
 
-  db:
-    image: mysql:latest
-    container_name: db
-    ports:
-      - 3360:3360
-    env_file:
-      - .env.dev
-    networks:
-      - gql-network
+
 
 networks:
   gql-network:

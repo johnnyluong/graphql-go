@@ -16,10 +16,8 @@ RUN go mod tidy
 COPY ./ .
 
 # Install any additional dependencies or tools you need
-# For example:
-# RUN go get github.com/99designs/gqlgen
+RUN go get github.com/golang-migrate/migrate/v4/cmd/migrate
 RUN go build -tags 'mysql' -ldflags="-X main.Version=1.0.0" -o $(go env GOPATH)/bin/migrate github.com/golang-migrate/migrate/v4/cmd/migrate/
-RUN migrate -database "mysql://root:password@tcp(db)/graphql_db" -path internal/pkg/db/migrations/mysql up
 
 # Set the command to run when the container starts
 CMD ["go", "run", "server.go"]

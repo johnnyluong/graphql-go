@@ -37,3 +37,5 @@ log/
 # Build artifacts
 /build/
 /dist/
+
+/data/
