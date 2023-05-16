@@ -38,4 +38,4 @@ log/
 /build/
 /dist/
 
-/data/
+/data/*
