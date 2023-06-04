@@ -15,7 +15,7 @@ services:
   app:
     build: .
     container_name: graphql-go  
-    command: go run server.go
+    command: go run ./server/server.go
     ports:
       - 8080:8080
     volumes:

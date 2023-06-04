@@ -20,4 +20,4 @@ COPY ./ .
 # RUN go build -tags 'mysql' -ldflags="-X main.Version=1.0.0" -o $(go env GOPATH)/bin/migrate github.com/golang-migrate/migrate/v4/cmd/migrate/
 
 # Set the command to run when the container starts
-CMD ["go", "run", "server.go"]
+CMD ["go", "run", "./server/server.go"]

@@ -11,22 +11,31 @@ import (
 
 	"github.com/johnnyluong/graphql-go/graph/model"
 	"github.com/johnnyluong/graphql-go/internal/links"
-
+	"github.com/johnnyluong/graphql-go/internal/users"
+	"github.com/johnnyluong/graphql-go/pkg/jwt"
 )
 
 // CreateLink is the resolver for the createLink field.
 func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
-	var link links.Link
+	var link links.Link //we create a link object that we defined for internal use; has same structure as schema
 	link.Title = input.Title
 	link.Address = input.Address
-	linkID := link.Save()
-	return &model.Link{ID: strconv.FormatInt(linkID, 10), Title:link.Title, Address:link.Address}, nil
+	linkID := link.Save() //after pulling fields from payload, store it in the object and use its save function to write to db
+	return &model.Link{ID: strconv.FormatInt(linkID, 10), Title:link.Title, Address:link.Address}, nil //return link data in graphql schema format, the is is the return value of saving the data
 }
 
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) (string, error) {
-	panic(fmt.Errorf("not implemented: CreateUser - createUser"))
+	var user users.User
+	user.Username = input.Username
+	user.Password = input.Password
+	user.Create()
+	token, err := jwt.GenerateToken(user.Username)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 // Login is the resolver for the login field.
@@ -41,14 +50,13 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input model.Refresh
 
 // Links is the resolver for the links field.
 func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
-	var links []*model.Link
-	dummyLink := model.Link{
-	  Title: "our dummy link",
-	  Address: "https://address.org",
-	  User: &model.User{Name: "admin"},
+	var resultLinks []*model.Link
+	var dbLinks []links.Link
+	dbLinks = links.GetAll()
+	for _, link := range dbLinks{
+		resultLinks = append(resultLinks, &model.Link{ID:link.ID, Title:link.Title, Address:link.Address})
 	}
-	  links = append(links, &dummyLink)
-	  return links, nil
+	return resultLinks, nil
 }
 
 // Mutation returns MutationResolver implementation.
