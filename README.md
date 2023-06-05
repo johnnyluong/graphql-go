@@ -13,7 +13,7 @@ docker run --name graphql-container -p 8080:8080 -d -v $(pwd):/app graphql-go
 
 ### Or Use Docker Compose
 ```
-docker compose up
+docker compose up --build
 docker compose down
 ```
 

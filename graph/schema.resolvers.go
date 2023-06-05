@@ -12,16 +12,31 @@ import (
 	"github.com/johnnyluong/graphql-go/graph/model"
 	"github.com/johnnyluong/graphql-go/internal/links"
 	"github.com/johnnyluong/graphql-go/internal/users"
+	"github.com/johnnyluong/graphql-go/internal/auth"
 	"github.com/johnnyluong/graphql-go/pkg/jwt"
 )
 
 // CreateLink is the resolver for the createLink field.
 func (r *mutationResolver) CreateLink(ctx context.Context, input model.NewLink) (*model.Link, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return &model.Link{}, fmt.Errorf("Access Denied")
+	}
+	
 	var link links.Link //we create a link object that we defined for internal use; has same structure as schema
 	link.Title = input.Title
 	link.Address = input.Address
+
+	link.User = user
+
 	linkID := link.Save() //after pulling fields from payload, store it in the object and use its save function to write to db
-	return &model.Link{ID: strconv.FormatInt(linkID, 10), Title:link.Title, Address:link.Address}, nil //return link data in graphql schema format, the is is the return value of saving the data
+	
+	graphqlUser := &model.User{
+		ID:		user.ID,
+		Name:	user.Username,
+	}
+	
+	return &model.Link{ID: strconv.FormatInt(linkID, 10), Title:link.Title, Address:link.Address, User:graphqlUser}, nil //return link data in graphql schema format, the is is the return value of saving the data
 }
 
 
@@ -40,12 +55,31 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input model.NewUser) 
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, input model.Login) (string, error) {
-	panic(fmt.Errorf("not implemented: Login - login"))
+	var user users.User
+	user.Username = input.Username
+	user.Password = input.Password
+	correct := user.Authenticate()
+	if !correct {
+		return "", &users.WrongUsernameOrPasswordError{} //Pointer to the error struct
+	}
+	token, err := jwt.GenerateToken(user.Username)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 // RefreshToken is the resolver for the refreshToken field.
 func (r *mutationResolver) RefreshToken(ctx context.Context, input model.RefreshTokenInput) (string, error) {
-	panic(fmt.Errorf("not implemented: RefreshToken - refreshToken"))
+	username, err := jwt.ParseToken(input.Token)
+	if err != nil {
+		return "", fmt.Errorf("access denied")
+	}
+	token, err := jwt.GenerateToken(username)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
 
 // Links is the resolver for the links field.
@@ -54,7 +88,11 @@ func (r *queryResolver) Links(ctx context.Context) ([]*model.Link, error) {
 	var dbLinks []links.Link
 	dbLinks = links.GetAll()
 	for _, link := range dbLinks{
-		resultLinks = append(resultLinks, &model.Link{ID:link.ID, Title:link.Title, Address:link.Address})
+		graphqlUser := &model.User{ //for each link we are extracting the user info and formatting it to be returned in the response
+			ID:		link.User.ID,
+			Name:	link.User.Username,
+		}
+		resultLinks = append(resultLinks, &model.Link{ID:link.ID, Title:link.Title, Address:link.Address, User: graphqlUser})
 	}
 	return resultLinks, nil
 }
