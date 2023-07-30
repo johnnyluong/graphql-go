@@ -37,7 +37,7 @@ migrate -database "mysql://root:[password]@tcp([mysql server container name])/[d
 ```
 
 ### Creating Migrations
-todo: replace with lib/ps
+TODO: replace with lib/ps
 ```
 go get -u github.com/go-sql-driver/mysql
 go build -tags 'mysql' -ldflags="-X main.Version=1.0.0" -o $GOPATH/bin/migrate github.com/golang-migrate/migrate/v4/cmd/migrate/
